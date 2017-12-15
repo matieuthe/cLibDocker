@@ -8,10 +8,8 @@ int main(int argc, const char * argv[]){
     
     char * data = "{\"Image\":\"myubuntu\"}";
     start_container(docker, data);
-   // statut_containers(docker);
-    
+    statut_containers(docker);
+    rm_container(docker, 0);
     close_docker(docker);
 	return 0;
 }
-
-

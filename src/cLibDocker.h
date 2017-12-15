@@ -20,6 +20,8 @@ int start_container(struct Docker * docker, char * data);
 
 int statut_containers(struct Docker * docker);
 
+int rm_container(struct Docker * docker, int indice);
+    
 void close_docker(struct Docker * docker);
 
 #endif

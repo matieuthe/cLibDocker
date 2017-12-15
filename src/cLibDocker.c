@@ -1,7 +1,8 @@
 #include "cLibDocker.h"
+#define ID_SIZE 64
 
 int init_curl(struct Docker * docker, char * url_request);
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata, void * pass);
+size_t default_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 int init_curl(struct Docker * docker, char * url_request){
     docker->curl = curl_easy_init();
@@ -18,12 +19,25 @@ int init_curl(struct Docker * docker, char * url_request){
 }
 
 /*
- *  CallBack function
+ *  CallBack function starting container
  */
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata, void * temp){
-    //struct Docker * docker = (struct Docker *)temp;
-    printf("%s\n", ptr);
-    //docker->nbContainers = 45;
+size_t start_callback(char *ptr, size_t size, size_t nmemb, void *userdata){
+    struct Docker * docker = (struct Docker *)userdata;
+    if(strlen(ptr)>64){
+        for(int i = 0; i < 64; i++){
+            docker->idContainers[docker->nbContainers][i] = ptr[i+7];
+        }
+        docker->idContainers[docker->nbContainers][64] = '\0';
+        docker->nbContainers++;
+    }
+    return 0;
+}
+
+/*
+ *  CallBack function status container
+ */
+size_t default_callback(char *ptr, size_t size, size_t nmemb, void *userdata){
+    printf("%s", ptr);
     return 0;
 }
 
@@ -32,7 +46,6 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata, void
  */
 int start_container(struct Docker * docker, char * data){
     printf("Creation of container\n");
-    
     init_curl(docker, "http://localhost/containers/create");
     
     CURLcode res;
@@ -47,11 +60,39 @@ int start_container(struct Docker * docker, char * data){
     curl_easy_setopt(docker->curl, CURLOPT_POST, 1L);
     curl_easy_setopt(docker->curl, CURLOPT_POSTFIELDSIZE, lg);
     curl_easy_setopt(docker->curl, CURLOPT_POSTFIELDS, data);
+    
     //Definition of the callBack Function
-    curl_easy_setopt(docker->curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(docker->curl, CURLOPT_WRITEFUNCTION, start_callback);
     curl_easy_setopt(docker->curl, CURLOPT_WRITEDATA, docker);
     res = curl_easy_perform(docker->curl);
+    return 1;
+}
+
+/*
+ * Remove a container
+ */
+int rm_container(struct Docker * docker, int indice){
+    if(indice >= docker->nbContainers)
+        return 0;
     
+    //Build the url of the request
+    char * url = "http://localhost/containers/";
+    int sizeUrl = strlen(url) + ID_SIZE + 1;
+    char * urlId = (char *)malloc(sizeUrl);
+    strcpy(urlId, url);
+    strcat(urlId, docker->idContainers[indice]);
+    urlId[sizeUrl - 1] = '\0';
+    printf("%s\n", urlId);
+    init_curl(docker, urlId);
+    //Free memory of curlId
+    free(urlId);
+    
+    CURLcode res;
+    curl_easy_setopt(docker->curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+    
+    //Definition of the callBack Function
+    curl_easy_setopt(docker->curl, CURLOPT_WRITEFUNCTION, default_callback);
+    res = curl_easy_perform(docker->curl);
     return 1;
 }
 
@@ -59,11 +100,11 @@ int start_container(struct Docker * docker, char * data){
  *  Get the staut of all containers running
  */
 int statut_containers(struct Docker * docker){
-    init_curl(docker->curl, "http://localhost/containers/json");
+    init_curl(docker, "http://localhost/containers/json");
     
     CURLcode res;
     //Definition of the callBack Function
-    curl_easy_setopt(docker->curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(docker->curl, CURLOPT_WRITEFUNCTION, default_callback);
     
     res = curl_easy_perform(docker->curl);
     return 1;
@@ -82,7 +123,7 @@ void init_docker(struct Docker * docker){
     docker->idContainers = (char **)malloc(10 * sizeof(char *));
     for(i = 0; i < 10; i++)
     {
-        docker->idContainers[i] = (char *)malloc( 64 * sizeof(char));
+        docker->idContainers[i] = (char *)malloc( 65 * sizeof(char));
         //To unvalid the line
         docker->idContainers[i][0] = 0;
     }
