@@ -24,10 +24,10 @@ int init_curl(struct Docker * docker, char * url_request){
 size_t start_callback(char *ptr, size_t size, size_t nmemb, void *userdata){
     struct Docker * docker = (struct Docker *)userdata;
     if(strlen(ptr)>64){
-        for(int i = 0; i < 64; i++){
+        for(int i = 0; i < ID_SIZE; i++){
             docker->idContainers[docker->nbContainers][i] = ptr[i+7];
         }
-        docker->idContainers[docker->nbContainers][64] = '\0';
+        docker->idContainers[docker->nbContainers][ID_SIZE] = '\0';
         docker->nbContainers++;
     }
     return 0;
@@ -99,7 +99,7 @@ int rm_container(struct Docker * docker, int indice){
     for(int i = 0; i < docker->nbContainers - 1; i++){
         strcpy(docker->idContainers[i], docker->idContainers[i+1]);
     }
-    docker->idContainers[nbContainers - 1][0] = '\0';
+    docker->idContainers[docker->nbContainers - 1][0] = '\0';
     docker->nbContainers--;
     return 1;
 }
@@ -131,7 +131,7 @@ void init_docker(struct Docker * docker){
     docker->idContainers = (char **)malloc(10 * sizeof(char *));
     for(i = 0; i < 10; i++)
     {
-        docker->idContainers[i] = (char *)malloc( 65 * sizeof(char));
+        docker->idContainers[i] = (char *)malloc( (ID_SIZE + 1) * sizeof(char));
         //To unvalid the line
         docker->idContainers[i][0] = 0;
     }
@@ -150,9 +150,3 @@ void close_docker(struct Docker * docker){
     
     free(docker->idContainers);
 }
-
-
-
-
-
-
