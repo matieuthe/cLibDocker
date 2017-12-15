@@ -92,7 +92,15 @@ int rm_container(struct Docker * docker, int indice){
     
     //Definition of the callBack Function
     curl_easy_setopt(docker->curl, CURLOPT_WRITEFUNCTION, default_callback);
+    //Execution of the request
     res = curl_easy_perform(docker->curl);
+    
+    //Reorganize id in the tab
+    for(int i = 0; i < docker->nbContainers - 1; i++){
+        strcpy(docker->idContainers[i], docker->idContainers[i+1]);
+    }
+    docker->idContainers[nbContainers - 1][0] = '\0';
+    docker->nbContainers--;
     return 1;
 }
 
