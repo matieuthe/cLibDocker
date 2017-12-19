@@ -34,8 +34,15 @@ struct CONTAINER {
     //NetworkingConfig
 };
 
+/*
+ * Return an empty initialize container
+ */
 struct CONTAINER * init_container();
-void get_Json(struct CONTAINER * container, char * result);
+
+/*
+ * result
+ */
+void get_Json(struct CONTAINER * container, char ** result);
 
 /*
  *  Function to set automatically the parameter and realloc memory

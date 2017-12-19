@@ -83,94 +83,95 @@ struct CONTAINER * init_container(){
  * Setter Function
  **************************************************************************/
 void set_Id(struct CONTAINER * container, char * Id){
-    realloc(container->Id, (strlen(Id) + 1) * sizeof(char));
+    container->Id = realloc(container->Id, (strlen(Id) + 1) * sizeof(char));
     strcpy(container->Id, Id);
 }
 
 void set_Image(struct CONTAINER * container, char * Image){
-    realloc(container->Image, (strlen(Image) + 1) * sizeof(char));
+    container->Image = realloc(container->Image, (strlen(Image) + 1) * sizeof(char));
     strcpy(container->Image, Image);
 }
 
 void set_Hostname(struct CONTAINER * container, char * Hostname){
-    realloc(container->Hostname, (strlen(Hostname) + 1) * sizeof(char));
+    container->Hostname = realloc(container->Hostname, (strlen(Hostname) + 1) * sizeof(char));
     strcpy(container->Hostname, Hostname);
 }
 
 void set_Domainname(struct CONTAINER * container, char * Domainname){
-    realloc(container->Domainname, (strlen(Domainname) + 1) * sizeof(char));
+    container->Domainname = realloc(container->Domainname, (strlen(Domainname) + 1) * sizeof(char));
     strcpy(container->Domainname, Domainname);
 }
 
 void set_User(struct CONTAINER * container, char * User){
-    realloc(container->User, (strlen(User) + 1) * sizeof(char));
+    container->User = realloc(container->User, (strlen(User) + 1) * sizeof(char));
     strcpy(container->User, User);
 }
 
 void set_AttachStdin(struct CONTAINER * container, char * AttachStdin){
-    realloc(container->AttachStdin, (strlen(AttachStdin) + 1) * sizeof(char));
+    container->AttachStdin =  realloc(container->AttachStdin, (strlen(AttachStdin) + 1) * sizeof(char));
     strcpy(container->AttachStdin, AttachStdin);
 }
 
 void set_AttachStdout(struct CONTAINER * container, char * AttachStdout){
-    realloc(container->AttachStdout, (strlen(AttachStdout) + 1) * sizeof(char));
+    container->AttachStdout = realloc(container->AttachStdout, (strlen(AttachStdout) + 1) * sizeof(char));
     strcpy(container->AttachStdout, AttachStdout);
 }
 
 void set_AttachStderr(struct CONTAINER * container, char * AttachStderr){
-    realloc(container->AttachStderr, (strlen(AttachStderr) + 1) * sizeof(char));
+    container->AttachStderr = realloc(container->AttachStderr, (strlen(AttachStderr) + 1) * sizeof(char));
     strcpy(container->AttachStderr, AttachStderr);
 }
 
 void set_Tty(struct CONTAINER * container, char * Tty){
-    realloc(container->Tty, (strlen(Tty) + 1) * sizeof(char));
+    container->Tty = realloc(container->Tty, (strlen(Tty) + 1) * sizeof(char));
     strcpy(container->Tty, Tty);
 }
 
 void set_OpenStdin(struct CONTAINER * container, char * OpenStdin){
-    realloc(container->OpenStdin, (strlen(OpenStdin) + 1) * sizeof(char));
+    container->OpenStdin = realloc(container->OpenStdin, (strlen(OpenStdin) + 1) * sizeof(char));
     strcpy(container->OpenStdin, OpenStdin);
 }
 
 void set_StdinOnce(struct CONTAINER * container, char * StdinOnce){
-    realloc(container->StdinOnce, (strlen(StdinOnce) + 1) * sizeof(char));
+    container->StdinOnce = realloc(container->StdinOnce, (strlen(StdinOnce) + 1) * sizeof(char));
     strcpy(container->StdinOnce, StdinOnce);
 }
 
 void set_Entrypoint(struct CONTAINER * container, char * Entrypoint){
-    realloc(container->Entrypoint, (strlen(Entrypoint) + 1) * sizeof(char));
+    container->Entrypoint = realloc(container->Entrypoint, (strlen(Entrypoint) + 1) * sizeof(char));
     strcpy(container->Entrypoint, Entrypoint);
 }
 
 void set_WorkingDir(struct CONTAINER * container, char * WorkingDir){
-    realloc(container->WorkingDir, (strlen(WorkingDir) + 1) * sizeof(char));
+    container->WorkingDir = realloc(container->WorkingDir, (strlen(WorkingDir) + 1) * sizeof(char));
     strcpy(container->WorkingDir, WorkingDir);
 }
 
 void set_NetworkDisabled(struct CONTAINER * container, char * NetworkDisabled){
-    realloc(container->NetworkDisabled, (strlen(NetworkDisabled) + 1) * sizeof(char));
+    container->NetworkDisabled = realloc(container->NetworkDisabled, (strlen(NetworkDisabled) + 1) * sizeof(char));
     strcpy(container->NetworkDisabled, NetworkDisabled);
 }
 
 void set_MacAddress(struct CONTAINER * container, char * MacAddress){
-    realloc(container->MacAddress, (strlen(MacAddress) + 1) * sizeof(char));
+    container->MacAddress = realloc(container->MacAddress, (strlen(MacAddress) + 1) * sizeof(char));
     strcpy(container->MacAddress, MacAddress);
 }
 
 void set_StopSignal(struct CONTAINER * container, char * StopSignal){
-    realloc(container->StopSignal, (strlen(StopSignal) + 1) * sizeof(char));
+    container->StopSignal = realloc(container->StopSignal, (strlen(StopSignal) + 1) * sizeof(char));
     strcpy(container->StopSignal, StopSignal);
 }
 
 void set_StopTimeout(struct CONTAINER * container, char * StopTimeout){
-    realloc(container->StopTimeout, (strlen(StopTimeout) + 1) * sizeof(char));
+    container->StopTimeout = realloc(container->StopTimeout, (strlen(StopTimeout) + 1) * sizeof(char));
     strcpy(container->StopTimeout, StopTimeout);
 }
 
 /**************************************************************************
  * JSON maker function
  **************************************************************************/
-void get_Json(struct CONTAINER * container, char * result){
+void get_Json(struct CONTAINER * container, char ** res){
+    char result[10000];
     result[0] = '{';
     result[1] = '\0';
     int precedent = 0;
@@ -193,8 +194,12 @@ void get_Json(struct CONTAINER * container, char * result){
     catChaineJson(container->MacAddress, "MacAddress", result, &precedent);
     catChaineJson(container->StopSignal, "StopSignal", result, &precedent);
     catChaineJson(container->StopTimeout, "StopTimeout", result, &precedent);
-
     strcat(result, "}");
+    
+    *res = (char *)realloc(*res, (strlen(result) + 1) * sizeof(char));
+    
+    strcpy(*res, result);
+    //free(result);
 }
 
 void catChaineJson(char * containerElmt, char * elmtName,char * result, int * precedent){
@@ -215,7 +220,7 @@ void catChaineJson(char * containerElmt, char * elmtName,char * result, int * pr
  **************************************************************************/
 void free_container(struct CONTAINER * container){
     //Free the char *
-    free(container->Id);
+    //free(container->Id);
     free(container->Hostname);
     free(container->Domainname);
     free(container->User);

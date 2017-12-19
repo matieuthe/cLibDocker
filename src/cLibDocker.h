@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <curl/curl.h>
+#include "container.h"
 
 struct Docker {
     CURL * curl;
