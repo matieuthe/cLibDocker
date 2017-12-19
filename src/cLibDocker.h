@@ -14,7 +14,7 @@ struct Docker {
     int sizeTab;
 };
 
-void init_docker(struct Docker * docker);
+struct Docker * init_docker();
 
 int start_container(struct Docker * docker, char * data);
 
@@ -22,6 +22,6 @@ int statut_containers(struct Docker * docker);
 
 int rm_container(struct Docker * docker, int indice);
     
-void close_docker(struct Docker * docker);
+void free_docker(struct Docker * docker);
 
 #endif

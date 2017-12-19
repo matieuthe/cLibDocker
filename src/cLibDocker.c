@@ -121,8 +121,10 @@ int statut_containers(struct Docker * docker){
 /*
  * Initialise Docker struct
  */
-void init_docker(struct Docker * docker){
+struct Docker * init_docker(){
+    struct Docker * docker = (struct Docker *)malloc(sizeof(struct Docker));
     printf("Initialisation of docker Struct\n");
+    
     int i;
     docker->sizeTab = 0;
     docker->nbContainers = 0;
@@ -136,12 +138,13 @@ void init_docker(struct Docker * docker){
         docker->idContainers[i][0] = 0;
     }
     docker->sizeTab = 10;
+    return docker;
 }
 
 /*
  * Function to call to free memory before quitt
  */
-void close_docker(struct Docker * docker){
+void free_docker(struct Docker * docker){
     int i;
     curl_easy_cleanup(docker->curl);
     
@@ -149,4 +152,5 @@ void close_docker(struct Docker * docker){
         free(docker->idContainers[i]);
     
     free(docker->idContainers);
+    free(docker);
 }

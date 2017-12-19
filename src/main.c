@@ -2,20 +2,26 @@
 #include "container.h"
 
 int main(int argc, const char * argv[]){
-    struct CONTAINER * container = (struct CONTAINER *)malloc(sizeof(struct CONTAINER));
-    init_container(container);
+    
+    struct CONTAINER * container = init_container();
+    
     set_Image(container, "ubuntu");
     printf("%s\n", container->Image);
     
     char * res = (char *)malloc(2000 * sizeof(char));
-    getJson(container, res);
+    get_Json(container, res);
     printf("%s\n", res);
 
     set_Id(container, "IdContainer");
-    getJson(container, res);
+    set_MacAddress(container, "102.32.232.23");
+    set_StopSignal(container, "SIGKILL");
+
+    get_Json(container, res);
     printf("%s\n", res);
     
     free(res);
+    free_container(container);
+    
     /*
     struct Docker * docker = (struct Docker *)malloc(sizeof(struct Docker));
     init_docker(docker);
