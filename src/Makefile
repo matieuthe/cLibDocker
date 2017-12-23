@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-lcurl -Wall -O
+CFLAGS=-lcurl -Wall -O2
 LDFLAGS=-lcurl
 EXEC=exec
 SRC=$(wildcard *.c)

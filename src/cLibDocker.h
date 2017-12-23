@@ -10,8 +10,7 @@
 
 typedef struct{
     CURL * curl;
-    CONTAINER * containers;
-    char ** idContainers;
+    CONTAINER ** containers;
     int nbContainers;
     int sizeTab;
 } DOCKER;
