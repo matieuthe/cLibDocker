@@ -26,6 +26,18 @@ void init_container(CONTAINER * container){
     container->MacAddress = NULL;
     container->StopSignal = NULL;
     container->StopTimeout = NULL;
+    
+    container->nbCmd = 0;
+    container->nbEnv = 0;
+    container->maxEnv = 10;
+    container->maxCmd = 10;
+    container->Cmd = (char **)malloc(10 * sizeof(char *));
+    container->Env = (char **)malloc(10 * sizeof(char *));
+
+    for(int i = 0; i < 10; i++){
+        container->Cmd[i] = NULL;
+        container->Env[i] = NULL;
+    }
 }
 
 CONTAINER * new_container(){
@@ -125,6 +137,26 @@ int set_StopTimeout(CONTAINER * container, char * StopTimeout){
 }
 
 /**************************************************************************
+ * Complex parameters of the struct
+ **************************************************************************/
+int add_Command_Container(CONTAINER * container, char * command){
+    if(container->nbCmd == container->maxCmd){
+        //reallocation memoire
+    }
+
+    if(command != NULL){
+        container->Cmd[container->nbCmd] = (char *)realloc(container->Cmd[container->nbCmd],(strlen(command) + 1) * sizeof(char));
+        if(container->Cmd[container->nbCmd] != NULL){
+            strcpy(container->Cmd[container->nbCmd++], command);
+            return 1;
+        }
+    }
+    else
+        return 1;
+    return 0;
+}
+
+/**************************************************************************
  * JSON maker function
  **************************************************************************/
 void get_Json(CONTAINER * container, char ** res){
@@ -194,6 +226,13 @@ void free_container(CONTAINER * container){
     free(container->MacAddress);
     free(container->StopSignal);
     free(container->StopTimeout);
+    
+    for(int i = 0; i < container->maxCmd; i++)
+        free(container->Cmd[i]);
+    for(int i = 0; i < container->maxEnv; i++)
+        free(container->Env[i]);
+    free(container->Cmd);
+    free(container->Env);
     
     //Free the container itself
     free(container);

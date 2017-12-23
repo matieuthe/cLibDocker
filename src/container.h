@@ -18,8 +18,17 @@ typedef struct {
     char * Tty;
     char * OpenStdin;
     char * StdinOnce;
+    
     //Env;
+    char ** Env;
+    int nbEnv;
+    int maxEnv;
+    
     //Cmd;
+    char ** Cmd;
+    int nbCmd;
+    int maxCmd;
+    
     char * Entrypoint;
     char * Image;
     //Labels
@@ -72,6 +81,8 @@ int set_NetworkDisabled(CONTAINER * container, char * NetworkDisabled);
 int set_MacAddress(CONTAINER * container, char * MacAddress);
 int set_StopSignal(CONTAINER * container, char * StopSignal);
 int set_StopTimeout(CONTAINER * container, char * StopTimeout);
+
+int add_Command_Container(CONTAINER * container, char * command);
 
 /*
  *  Copy the struct origin into dst

@@ -4,6 +4,10 @@
 int init_curl(DOCKER * docker, char * url_request);
 size_t default_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
+/************************************************************
+ * Curl Function
+*************************************************************/
+
 int init_curl(DOCKER * docker, char * url_request){
     docker->curl = curl_easy_init();
 
@@ -23,17 +27,19 @@ int init_curl(DOCKER * docker, char * url_request){
  */
 size_t start_callback(char *ptr, size_t size, size_t nmemb, void *userdata){
     DOCKER * docker = (DOCKER *)userdata;
-    
-    if(strlen(ptr)>64 && ptr[6] == '"'){
+
+    if(ptr[2] == 'I' && ptr[3] == 'd'){
         char res[ID_SIZE + 1];
         for(int i = 0; i < ID_SIZE; i++){
             res[i] = ptr[i+7];
         }
         res[ID_SIZE] = '\0';
-        printf("Creation \"%s\" with id : %s \n", docker->containers[docker->nbContainers]->Image, res);
+        printf("CREATE : \"%s\" with id : %s \n", docker->containers[docker->nbContainers]->Image, res);
         set_Id(docker->containers[docker->nbContainers], res);
+        docker->nbContainers++;
+    }else{
+        printf("ERROR : Creation of \"%s\" Impossible \n", docker->containers[docker->nbContainers]->Image);
     }
-    docker->nbContainers++;
     return 0;
 }
 
@@ -46,8 +52,17 @@ size_t default_callback(char *ptr, size_t size, size_t nmemb, void *userdata){
 }
 
 /*
- *  Start the containers specify in data
+ * Print the reception message
  */
+size_t print_callback(char *ptr, size_t size, size_t nmemb, void *userdata){
+    printf("%s", ptr);
+    return 0;
+}
+
+/*************************************************************
+ * Start container Function : start the container in parameter
+ * and store a copy into the DOCKER struct
+ *************************************************************/
 int start_container(DOCKER * docker, CONTAINER * container){
     init_curl(docker, "http://localhost/containers/create");
     CURLcode res;
@@ -84,13 +99,13 @@ int start_container(DOCKER * docker, CONTAINER * container){
     return 1;
 }
 
-/*
- * Remove a container
- */
+/************************************************************
+ * Remove the container at indice in the docker struct
+************************************************************/
 int rm_container(DOCKER * docker, int indice){
-    if(indice > docker->nbContainers || indice < 0)
+    if(indice >= docker->nbContainers || indice < 0)
         return 0;
-
+    
     //Build the url of the request
     char * url = "http://localhost/containers/";
     int sizeUrl = 28 + ID_SIZE + 1;
@@ -109,7 +124,7 @@ int rm_container(DOCKER * docker, int indice){
     //Execution of the request
     res = curl_easy_perform(docker->curl);
 
-    printf("Delete \"%s\" with id : %s\n", docker->containers[indice]->Image, docker->containers[indice]->Id);
+    printf("DELETE : \"%s\" with id : %s\n", docker->containers[indice]->Image, docker->containers[indice]->Id);
     
     for(int i = indice; i < docker->nbContainers - 1; i++){
         CONTAINER *tmp = docker->containers[i];
@@ -122,9 +137,9 @@ int rm_container(DOCKER * docker, int indice){
     return 1;
 }
 
-/*
+/**********************************************************
  *  Get the staut of all containers running
- */
+ **********************************************************/
 int statut_containers(DOCKER * docker){
     init_curl(docker, "http://localhost/containers/json");
     
@@ -136,9 +151,9 @@ int statut_containers(DOCKER * docker){
     return 1;
 }
 
-/*
- * Initialise Docker struct
- */
+/*********************************************************
+ * Init and Quit function of the docker struct
+ *********************************************************/
 DOCKER * init_docker(){
     DOCKER * docker = (DOCKER *)malloc(sizeof(DOCKER));
     int i;
@@ -153,9 +168,6 @@ DOCKER * init_docker(){
     return docker;
 }
 
-/*
- * Function to call to free memory before quitt
- */
 void free_docker(DOCKER * docker){
     curl_easy_cleanup(docker->curl);
     //Free all the containers of the tab
