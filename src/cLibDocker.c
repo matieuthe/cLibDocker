@@ -1,10 +1,10 @@
 #include "cLibDocker.h"
 #define ID_SIZE 64
 
-int init_curl(struct Docker * docker, char * url_request);
+int init_curl(DOCKER * docker, char * url_request);
 size_t default_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
-int init_curl(struct Docker * docker, char * url_request){
+int init_curl(DOCKER * docker, char * url_request){
     docker->curl = curl_easy_init();
 
     if(docker->curl){
@@ -22,14 +22,17 @@ int init_curl(struct Docker * docker, char * url_request){
  *  CallBack function starting container
  */
 size_t start_callback(char *ptr, size_t size, size_t nmemb, void *userdata){
-    struct Docker * docker = (struct Docker *)userdata;
+    DOCKER * docker = (DOCKER *)userdata;
     if(strlen(ptr)>64){
+        char res[ID_SIZE + 1];
         for(int i = 0; i < ID_SIZE; i++){
-            docker->idContainers[docker->nbContainers][i] = ptr[i+7];
+            res[i] = ptr[i+7];
         }
-        docker->idContainers[docker->nbContainers][ID_SIZE] = '\0';
-        docker->nbContainers++;
+        res[ID_SIZE] = '\0';
+        printf("%s\n", res);
+        set_Id(&docker->containers[0], res);
     }
+    docker->nbContainers++;
     return 0;
 }
 
@@ -44,34 +47,40 @@ size_t default_callback(char *ptr, size_t size, size_t nmemb, void *userdata){
 /*
  *  Start the containers specify in data
  */
-int start_container(struct Docker * docker, char * data){
+int start_container(DOCKER * docker, CONTAINER * container){
     printf("Creation of container\n");
     init_curl(docker, "http://localhost/containers/create");
     
     CURLcode res;
     struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, "Content-Type: application/json");
-    
     curl_easy_setopt(docker->curl, CURLOPT_HTTPGET, 1L);
     curl_easy_setopt(docker->curl, CURLOPT_HTTPHEADER, headers);
     
-    //Post Operation
-    int lg = strlen(data);
+    copy_container(container, &docker->containers[0]);
+    
+    char * data ;
+    get_Json(container, &data);
+    int lg = 0;
+    if(data != NULL) lg = strlen(data);
+    
     curl_easy_setopt(docker->curl, CURLOPT_POST, 1L);
     curl_easy_setopt(docker->curl, CURLOPT_POSTFIELDSIZE, lg);
     curl_easy_setopt(docker->curl, CURLOPT_POSTFIELDS, data);
-    
+
     //Definition of the callBack Function
     curl_easy_setopt(docker->curl, CURLOPT_WRITEFUNCTION, start_callback);
     curl_easy_setopt(docker->curl, CURLOPT_WRITEDATA, docker);
     res = curl_easy_perform(docker->curl);
+    
+    free(data);
     return 1;
 }
 
 /*
  * Remove a container
  */
-int rm_container(struct Docker * docker, int indice){
+int rm_container(DOCKER * docker, int indice){
     if(indice >= docker->nbContainers)
         return 0;
     
@@ -107,7 +116,7 @@ int rm_container(struct Docker * docker, int indice){
 /*
  *  Get the staut of all containers running
  */
-int statut_containers(struct Docker * docker){
+int statut_containers(DOCKER * docker){
     init_curl(docker, "http://localhost/containers/json");
     
     CURLcode res;
@@ -121,13 +130,16 @@ int statut_containers(struct Docker * docker){
 /*
  * Initialise Docker struct
  */
-struct Docker * init_docker(){
-    struct Docker * docker = (struct Docker *)malloc(sizeof(struct Docker));
+DOCKER * init_docker(){
+    DOCKER * docker = (DOCKER *)malloc(sizeof(DOCKER));
     printf("Initialisation of docker Struct\n");
-    
     int i;
     docker->sizeTab = 0;
     docker->nbContainers = 0;
+    
+    docker->containers = (CONTAINER *)malloc(10 * sizeof(CONTAINER));
+    for(i = 0; i < 10; i++)
+        init_container(&docker->containers[i]);
     
     //Allocate memory to idContainers for 10 containers
     docker->idContainers = (char **)malloc(10 * sizeof(char *));
@@ -135,7 +147,7 @@ struct Docker * init_docker(){
     {
         docker->idContainers[i] = (char *)malloc( (ID_SIZE + 1) * sizeof(char));
         //To unvalid the line
-        docker->idContainers[i][0] = 0;
+        docker->idContainers[i][0] = '\0';
     }
     docker->sizeTab = 10;
     return docker;
@@ -144,7 +156,7 @@ struct Docker * init_docker(){
 /*
  * Function to call to free memory before quitt
  */
-void free_docker(struct Docker * docker){
+void free_docker(DOCKER * docker){
     int i;
     curl_easy_cleanup(docker->curl);
     

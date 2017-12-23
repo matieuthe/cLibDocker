@@ -7,7 +7,7 @@
 #include <string.h>
 #include <curl/curl.h>
 
-struct CONTAINER {
+typedef struct {
     char * Id;
     char * Hostname;
     char * Domainname;
@@ -32,43 +32,56 @@ struct CONTAINER {
     char * StopTimeout;
     //HostConfig
     //NetworkingConfig
-};
+} CONTAINER;
 
 /*
- * Return an empty initialize container
+ * Return an empty initialize container with memory allocated
  */
-struct CONTAINER * init_container();
+CONTAINER * new_container();
 
 /*
- * result
+ *  Reinit the container in parameters
  */
-void get_Json(struct CONTAINER * container, char ** result);
+void init_container(CONTAINER * container);
+
+
+/*
+ * Return a Json representation of the container to use it with into docker
+ * Result is automatically realloc
+ */
+void get_Json(CONTAINER * container, char ** result);
 
 /*
  *  Function to set automatically the parameter and realloc memory
+ *  Return 1 if the operation works and 0 if not
  */
-void set_Id(struct CONTAINER * container, char * Id);
-void set_Image(struct CONTAINER * container, char * Image);
-void set_Hostname(struct CONTAINER * container, char * Hostname);
-void set_Domainname(struct CONTAINER * container, char * Domainname);
-void set_User(struct CONTAINER * container, char * User);
-void set_AttachStdin(struct CONTAINER * container, char * AttachStdin);
-void set_AttachStdout(struct CONTAINER * container, char * AttachStdout);
-void set_AttachStderr(struct CONTAINER * container, char * AttachStderr);
-void set_Tty(struct CONTAINER * container, char * Tty);
-void set_OpenStdin(struct CONTAINER * container, char * OpenStdin);
-void set_StdinOnce(struct CONTAINER * container, char * StdinOnce);
-void set_Entrypoint(struct CONTAINER * container, char * Entrypoint);
-void set_WorkingDir(struct CONTAINER * container, char * WorkingDir);
-void set_NetworkDisabled(struct CONTAINER * container, char * NetworkDisabled);
-void set_MacAddress(struct CONTAINER * container, char * MacAddress);
-void set_StopSignal(struct CONTAINER * container, char * StopSignal);
-void set_StopTimeout(struct CONTAINER * container, char * StopTimeout);
+int set_Id(CONTAINER * container, char * Id);
+int set_Image(CONTAINER * container, char * Image);
+int set_Hostname(CONTAINER * container, char * Hostname);
+int set_Domainname(CONTAINER * container, char * Domainname);
+int set_User(CONTAINER * container, char * User);
+int set_AttachStdin(CONTAINER * container, char * AttachStdin);
+int set_AttachStdout(CONTAINER * container, char * AttachStdout);
+int set_AttachStderr(CONTAINER * container, char * AttachStderr);
+int set_Tty(CONTAINER * container, char * Tty);
+int set_OpenStdin(CONTAINER * container, char * OpenStdin);
+int set_StdinOnce(CONTAINER * container, char * StdinOnce);
+int set_Entrypoint(CONTAINER * container, char * Entrypoint);
+int set_WorkingDir(CONTAINER * container, char * WorkingDir);
+int set_NetworkDisabled(CONTAINER * container, char * NetworkDisabled);
+int set_MacAddress(CONTAINER * container, char * MacAddress);
+int set_StopSignal(CONTAINER * container, char * StopSignal);
+int set_StopTimeout(CONTAINER * container, char * StopTimeout);
+
+/*
+ *  Copy the struct origin into dst
+ */
+void copy_container(const CONTAINER * origin, CONTAINER * dst);
 
 /*
  * Free the memory used by the structure
  */
-void free_container(struct CONTAINER * container);
+void free_container(CONTAINER * container);
 
 #endif
 

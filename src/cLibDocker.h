@@ -8,21 +8,21 @@
 #include <curl/curl.h>
 #include "container.h"
 
-struct Docker {
+typedef struct{
     CURL * curl;
+    CONTAINER * containers;
     char ** idContainers;
     int nbContainers;
     int sizeTab;
-};
+} DOCKER;
 
-struct Docker * init_docker();
+DOCKER * init_docker();
 
-int start_container(struct Docker * docker, char * data);
+int start_container(DOCKER * docker, CONTAINER * container);
+int statut_containers(DOCKER * docker);
 
-int statut_containers(struct Docker * docker);
-
-int rm_container(struct Docker * docker, int indice);
+int rm_container(DOCKER * docker, int indice);
     
-void free_docker(struct Docker * docker);
+void free_docker(DOCKER * docker);
 
 #endif
