@@ -21,7 +21,7 @@ int start_container(DOCKER * docker, CONTAINER * container);
 int statut_containers(DOCKER * docker);
 
 int rm_container(DOCKER * docker, int indice);
-    
+int rm_stopped_containers(DOCKER * docker);
 void free_docker(DOCKER * docker);
 
 #endif

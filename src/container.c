@@ -183,6 +183,24 @@ void get_Json(CONTAINER * container, char ** res){
     catChaineJson(container->MacAddress, "MacAddress", result, &precedent);
     catChaineJson(container->StopSignal, "StopSignal", result, &precedent);
     catChaineJson(container->StopTimeout, "StopTimeout", result, &precedent);
+    
+    //Generation des commandes
+    if(container->nbCmd > 0){
+        if(precedent) strcat(result, ",\"Cmd\":");
+        
+        char resultCommand[1000];
+        resultCommand[0] = '[';
+        resultCommand[1] = '\0';
+        for(int i = 0; i < container->nbCmd; i++) {
+            strcat(resultCommand, "\"");
+            strcat(resultCommand, container->Cmd[i]);
+            if(i == (container->nbCmd - 1)) strcat(resultCommand, "\"");
+            else strcat(resultCommand, "\",");
+        }
+        strcat(resultCommand, "]");
+        strcat(result, resultCommand);
+    }
+    
     strcat(result, "}");
     
     *res = NULL; //In case of a non init param
